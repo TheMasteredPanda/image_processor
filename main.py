@@ -6,6 +6,33 @@ import requests
 flask_app = flask.Flask(__name__)
 
 
+@flask_app.route('/pride', methods=['get'])
+def distort():
+    img_url = flask.request.args.get('img')
+
+    if img_url is None or img_url == '':
+        return ''
+
+    response = requests.get(img_url)
+    _img = BytesIO(response.content)
+    _img.seek(0)
+
+    with Image() as blended_image:
+        with Image(file=img_url) as avatar:
+            with Image(filename='images/pride.png') as pride_image:
+                avatar.resize(width=800, height=800)
+                pride_image.resize(width=800, height=800)
+                pride_image.transparentize(0.5)
+                avatar.composite(pride_image)
+                blended_image.sequence.append(avatar.sequence[0])
+
+        buffer = BytesIO()
+        blended_image.save(buffer)
+        buffer.seek(0)
+
+    return flask.send_file(buffer, attachment_filename='pride.png')
+
+
 @flask_app.route('/distort', methods=['get'])
 def distort():
     img_url = flask.request.args.get('img')
