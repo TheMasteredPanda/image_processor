@@ -18,7 +18,7 @@ def pride():
     _img.seek(0)
 
     with Image() as blended_image:
-        with Image(file=img_url) as avatar:
+        with Image(file=_img) as avatar:
             with Image(filename='images/pride.png') as pride_image:
                 avatar.resize(width=800, height=800)
                 pride_image.resize(width=800, height=800)
