@@ -7,7 +7,7 @@ flask_app = flask.Flask(__name__)
 
 
 @flask_app.route('/pride', methods=['get'])
-def distort():
+def pride():
     img_url = flask.request.args.get('img')
 
     if img_url is None or img_url == '':
