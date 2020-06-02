@@ -11,7 +11,7 @@ def pride():
     img_url = flask.request.args.get('img')
 
     if img_url is None or img_url == '':
-        return 'Invalid image url'
+        return flask.jsonify({'error': 'invalid image url'})
 
     # get file extension
     split = img_url.split('.')
@@ -29,7 +29,7 @@ def pride():
     with Image() as blended_image:
         with Image(file=_img) as avatar:
             if len(avatar.sequence) > 60:
-                return 'Gif has too many frames'
+                return flask.jsonify({'error': 'Gif has too many frames'})
 
             with Image(filename='images/pride.png') as pride_image:
                 pride_image.resize(width=800, height=800)
@@ -59,7 +59,7 @@ def distort():
     img_url = flask.request.args.get('img')
 
     if img_url is None or img_url == '':
-        return ''
+        return flask.jsonify({'error': 'invalid image url'})
 
     # get file extension
     split = img_url.split('.')
@@ -77,7 +77,7 @@ def distort():
     with Image() as new_image:
         with Image(file=_img) as img:
             if len(img.sequence) > 60:
-                return 'Gif has too many frames'
+                return flask.jsonify({'error': 'Gif has too many frames'})
 
             def transform_image(image):
                 image.resize(width=800, height=800)
