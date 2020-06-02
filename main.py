@@ -11,7 +11,7 @@ def pride():
     img_url = flask.request.args.get('img')
 
     if img_url is None or img_url == '':
-        return ''
+        return 'Invalid image url'
 
     response = requests.get(img_url)
     _img = BytesIO(response.content)
@@ -19,12 +19,24 @@ def pride():
 
     with Image() as blended_image:
         with Image(file=_img) as avatar:
+            if not len(avatar.sequence) > 60:
+                return 'Gif has too many frames'
+
             with Image(filename='images/pride.png') as pride_image:
-                avatar.resize(width=800, height=800)
                 pride_image.resize(width=800, height=800)
                 pride_image.transparentize(0.6)
-                avatar.composite(pride_image)
-                blended_image.sequence.append(avatar.sequence[0])
+
+                def apply_pride(img):
+                    img.resize(width=800, height=800)
+                    img.composite(pride_image)
+
+                if len(avatar.sequence) > 1:
+                    for frame in avatar.sequence:
+                        apply_pride(frame)
+                        blended_image.sequence.append(frame)
+                else:
+                    apply_pride(avatar)
+                    blended_image.sequence.append(avatar)
 
         buffer = BytesIO()
         blended_image.save(buffer)
