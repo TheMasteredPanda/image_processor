@@ -13,6 +13,15 @@ def pride():
     if img_url is None or img_url == '':
         return 'Invalid image url'
 
+    # get file extension
+    split = img_url.split('.')
+    extension = split[-1]
+
+    # check if it has arguments after extension
+    split = extension.split('?')
+    if len(split) > 1:
+        extension = split[0]
+
     response = requests.get(img_url)
     _img = BytesIO(response.content)
     _img.seek(0)
@@ -42,7 +51,7 @@ def pride():
         blended_image.save(buffer)
         buffer.seek(0)
 
-    return flask.send_file(buffer, attachment_filename='pride.png')
+    return flask.send_file(buffer, attachment_filename=f'pride.{extension}')
 
 
 @flask_app.route('/distort', methods=['get'])
@@ -51,6 +60,15 @@ def distort():
 
     if img_url is None or img_url == '':
         return ''
+
+    # get file extension
+    split = img_url.split('.')
+    extension = split[-1]
+
+    # check if it has arguments after extension
+    split = extension.split('?')
+    if len(split) > 1:
+        extension = split[0]
 
     response = requests.get(img_url)
     _img = BytesIO(response.content)
@@ -79,7 +97,7 @@ def distort():
         new_image.save(magikd_buffer)
         magikd_buffer.seek(0)
 
-    return flask.send_file(magikd_buffer, attachment_filename='distorted.png')
+    return flask.send_file(magikd_buffer, attachment_filename=f'distorted.{extension}')
 
 
 if __name__ == '__main__':
