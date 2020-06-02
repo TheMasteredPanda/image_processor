@@ -19,7 +19,7 @@ def pride():
 
     with Image() as blended_image:
         with Image(file=_img) as avatar:
-            if not len(avatar.sequence) > 60:
+            if len(avatar.sequence) > 60:
                 return 'Gif has too many frames'
 
             with Image(filename='images/pride.png') as pride_image:
