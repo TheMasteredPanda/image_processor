@@ -80,9 +80,10 @@ def distort():
                 return flask.jsonify({'error': 'Gif has too many frames'})
 
             def transform_image(image):
-                image.resize(width=800, height=800)
-                image.liquid_rescale(width=int(image.width * 0.5), height=int(image.height * 0.5), delta_x=1)
-                image.liquid_rescale(width=int(image.width * 1.5), height=int(image.height * 1.5), delta_x=2)
+                image.resize(width=500, height=500)
+                image.liquid_rescale(width=int(image.width * 0.3), height=int(image.height * 0.3), delta_x=1)
+                image.liquid_rescale(width=int(image.width * 3), height=int(image.height * 3), delta_x=2)
+                image.implode(0.25)
 
             if len(img.sequence) > 1:
                 for frame in img.sequence:
