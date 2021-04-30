@@ -102,6 +102,7 @@ def election_image():
         buffer = BytesIO()
         buffer.seek(0)
         Image.open(buffer)
+        print("Sending file")
         flask.send_file(buffer, attachment_filename="electionimg.png")
 
 
