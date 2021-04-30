@@ -98,12 +98,13 @@ def election_image():
 
         # Stops the front from resizing.
         table.auto_set_font_size(False)
-        buffer = BytesIO()
-        plt.savefig(buffer, format="png")
-        buffer.seek(0)
-        Image.open(buffer)
-        print("Sending file")
-        flask.send_file(buffer, attachment_filename="electionimg.png")
+
+    print("Sending file")
+    buffer = BytesIO()
+    plt.savefig(buffer, format="png")
+    buffer.seek(0)
+    Image.open(buffer)
+    return flask.send_file(buffer, attachment_filename="electionimg.png")
 
 
 """
