@@ -111,7 +111,7 @@ def election_image():
     return flask.send_file(buffer, attachment_filename="electionimg.png")
 
 
-@flask_app.route("/electionimage", methods=["post"])
+@flask_app.route("/divisionimage", methods=["post"])
 def division_image():
     title_font = ImageFont.truetype("static/Metropolis-Bold.otf", 40)
     key_font = ImageFont.truetype("static/Metropolis-SemiBold.otf", 25)
