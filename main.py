@@ -1,6 +1,6 @@
-import random
-import string
+import math
 import matplotlib.pyplot as plt
+from PIL import ImageDraw, Image as PILImage, ImageFont
 from flask.globals import request
 from wand.image import Image
 from io import BytesIO
@@ -13,12 +13,17 @@ flask_app = flask.Flask(__name__)
 @flask_app.route("/electionimage", methods=["post"])
 def election_image():
     """
-    Endpoint for generating an election image from the data provided in the request body.
-    candidates (list) - a list of candidates with the information relevant to the generation of the image.
+    Endpoint for generating an election image from the data provided
+    in the request body.
+    candidates (list) - a list of candidates with the information relevant to
+    the generation of the image.
     electorate_size (int) - the size of the electorate.
-    turnout (int) - the amount of people from that electorate that showed and voted.
-    include_nonvoters (boolean) - used to determine whether or not nonvoters should be include in the pie chart.
-    generate_table (boolean) - used to determine whether a table or a pie chart should be generated.
+    turnout (int) - the amount of people from that electorate that showed
+    and voted.
+    include_nonvoters (boolean) - used to determine whether or not nonvoters
+    should be include in the pie chart.
+    generate_table (boolean) - used to determine whether a table or a
+    pie chart should be generated.
     """
     content = request.json
     candidates = content["candidates"]
@@ -106,11 +111,81 @@ def election_image():
     return flask.send_file(buffer, attachment_filename="electionimg.png")
 
 
-"""
-@flask_app.route("/electionimage", methods=["get"])
-def election_image():
-    pass
-"""
+@flask_app.route("/electionimage", methods=["post"])
+def division_image():
+    title_font = ImageFont.truetype("static/Metropolis-Bold.otf", 40)
+    key_font = ImageFont.truetype("static/Metropolis-SemiBold.otf", 25)
+    division = request.json
+    aye_members = division["aye_members"]
+    no_members = division["no_members"]
+    parties = division["parties"]
+
+    def draw_ayes(draw: ImageDraw.ImageDraw, members: list):
+        columns = math.ceil(len(members) / 10)
+        draw.text((100, 420), "Ayes", font=title_font, fill=(0, 0, 0))
+
+        for column in range(columns + 1):
+            for j, member in enumerate(members[10 * (column - 1) : 10 * column]):
+                draw.ellipse(
+                    [
+                        (
+                            80 + ((20 * column) + (2 * column)),
+                            480 + (20 * j) + (2 * j),
+                        ),
+                        (
+                            100 + ((20 * column) + (2 * column)),
+                            500 + (20 * j) + (2 * j) - 2,
+                        ),
+                    ],
+                    f"{member['colour']}",
+                )
+
+    def draw_noes(draw: ImageDraw.ImageDraw, members: list):
+        columns = math.ceil(len(members) / 10)
+        draw.text((100, 120), "Noes", font=title_font, fill=(0, 0, 0))
+        for column in range(columns + 1):
+            for j, member in enumerate(members[10 * (column - 1) : 10 * column]):
+                draw.ellipse(
+                    [
+                        (
+                            80 + ((20 * column) + (2 * column)),
+                            180 + (20 * j) + (2 * j),
+                        ),
+                        (
+                            100 + ((20 * column) + ((2 * column) - 2)),
+                            200 + (20 * j) + ((2 * j) - 2),
+                        ),
+                    ],
+                    f"{member['colour']}",
+                )
+
+    def draw_keys(draw: ImageDraw.ImageDraw, parties: dict):
+        for i, key in enumerate(parties.keys()):
+            name = parties[key]["name"]
+            w, h = draw.textsize(name)
+            draw.text(
+                (1600, 120 + (60 * i)),
+                f"{name}",
+                font=key_font,
+                fill="#ffffff",
+                anchor="lt",
+            )
+            draw.ellipse(
+                [(1520, 110 + (60 * i)), (1570, 150 + (60 * i))],
+                fill=f"{parties[key]['colour']}",
+            )
+
+    im = PILImage.new("RGB", (2100, 800), "#edebea")
+    draw = ImageDraw.Draw(im)
+    draw.rectangle([(1450, 0), (2100, 800)], fill="#b7dade")
+    draw.polygon([(1300, 0), (1450, 0), (1450, 800)], fill="#b7dade")
+    draw_ayes(draw, aye_members)
+    draw_noes(draw, no_members)
+    draw_keys(draw, parties)
+    buffer = BytesIO()
+    im.save(buffer, format="png")
+    buffer.seek(0)
+    return flask.send_file(buffer, attachment_filename="divisionimage.png")
 
 
 @flask_app.route("/pride", methods=["get"])
