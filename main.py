@@ -98,8 +98,8 @@ def election_image():
 
         # Stops the front from resizing.
         table.auto_set_font_size(False)
-        plt.savefig("images/election_image.png")
         buffer = BytesIO()
+        plt.savefig(buffer, format="png")
         buffer.seek(0)
         Image.open(buffer)
         print("Sending file")
