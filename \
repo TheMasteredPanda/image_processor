@@ -1,6 +1,4 @@
-import random
-import string
-import matplotlib.pyplot as plt
+from matplotlib.pylot as plt
 from flask.globals import request
 from wand.image import Image
 from io import BytesIO
@@ -10,26 +8,18 @@ import requests
 flask_app = flask.Flask(__name__)
 
 
-@flask_app.route("/electionimage", methods=["post"])
+@flask_app.route("/electionimage", methods=["get"])
 def election_image():
-    """
-    Endpoint for generating an election image from the data provided in the request body.
-    candidates (list) - a list of candidates with the information relevant to the generation of the image.
-    electorate_size (int) - the size of the electorate.
-    turnout (int) - the amount of people from that electorate that showed and voted.
-    include_nonvoters (boolean) - used to determine whether or not nonvoters should be include in the pie chart.
-    generate_table (boolean) - used to determine whether a table or a pie chart should be generated.
-    """
     content = request.json
     candidates = content["candidates"]
     electorate_size = content["electorate_size"]
     turnout = content["turnout"]
     include_nonvoters = content["include_nonvoters"]
     generate_table = content["generate_table"]
+    parties = content["parties"]
     under_1k = []
     the_rest = []
 
-    # Candidates that got under 1,000 votes get bundled into one category.
     for candidate in candidates:
         if candidate["votes"] > 1000:
             the_rest.append(candidate)
@@ -40,10 +30,14 @@ def election_image():
     under_1k_total = sum([c["votes"] for c in under_1k])
     parent_pie_values = [c["votes"] for c in the_rest]
     parent_pie_labels = []
-    # this is primarily used to shorten long party names.
     for c in the_rest:
-        party_name = c["party_name"]
-        parent_pie_labels.append(f"{party_name} ({c['votes']:,} votes)")
+        party_name = content[c["party_id"]]
+        abbr = party_name if party_name is not None else ""
+        if abbr == "UK Independent Party":
+            abbr = "UKIP"
+        if abbr == "Scottish National Party":
+            abbr = "SNP"
+        parent_pie_labels.append(f"{abbr} ({c['votes']:,} votes)")
 
     parent_pie_values.append(under_1k_total)
     parent_pie_labels.append(f"Others ({under_1k_total:,} votes)")
@@ -51,20 +45,26 @@ def election_image():
         parent_pie_values.append(nonvoters)
         parent_pie_labels.append(f"Didn't Vote ({nonvoters:,} votes)")
 
+    # make figure and assign axis objects
     plt.tight_layout()
     fig, ax1 = plt.subplots()
+
+    # large pie chart parameters
+    # explode = [0.1, 0, 0]
+    # rotate so that first wedge is split by the x-axis
 
     if generate_table is False:
         ax1.pie(parent_pie_values, radius=0.6, labels=parent_pie_labels)
     else:
-        # This section is for the table.
         ax1.set_axis_off()
         rows = []
 
-        # Almost identical to the loop above, however this is used to produce a 2d list.
-        # Each list is considered a row in the table.
-        for c in candidates:
+        for c in result.get_candidates():
             party_name = c["party_name"]
+            if party_name == "UK Independence Party":
+                party_name = "UKIP"
+            if party_name == "Sccotish National Party":
+                party_name = "SNP"
             rows.append(
                 [
                     c["name"],
@@ -87,29 +87,22 @@ def election_image():
             ],
             cellLoc="center",
         )
-        # Ensure that the size of some of the columns aren't too big for the data, or too small for the data.
-        table.auto_set_column_width(col=list(range(len(candidates))))
+        table.auto_set_column_width(col=list(range(len(result.get_candidates()))))
         cells = table.get_celld()
 
-        # The only way i've found that actually sets the height of all rows in the table.
         for i in range(5):
             for j in range(0, 13):
                 cells[(j, i)].set_height(0.065)
 
-        # Stops the front from resizing.
         table.auto_set_font_size(False)
-        plt.savefig("images/election_image.png")
-        buffer = BytesIO()
-        buffer.seek(0)
-        Image.open(buffer)
-        flask.send_file(buffer, attachment_filename="electionimg.png")
+    file_id = "".join(random.choice(string.ascii_letters) for i in range(15))
+    plt.savefig(f"tmpimages/{file_id}.png")
+    image_file = File(f"tmpimages/{file_id}.png", filename=f"{file_id}.png")
 
 
-"""
 @flask_app.route("/electionimage", methods=["get"])
 def election_image():
     pass
-"""
 
 
 @flask_app.route("/pride", methods=["get"])
