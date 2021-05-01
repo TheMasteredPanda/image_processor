@@ -67,6 +67,7 @@ def election_image():
         rows = []
 
         # Almost identical to the loop above, however this is used to produce a 2d list.
+
         # Each list is considered a row in the table.
         for c in candidates:
             party_name = c["party_name"]
@@ -120,12 +121,14 @@ def division_image():
     no_members = division["no_members"]
     parties = division["parties"]
 
-    def draw_ayes(draw: ImageDraw.ImageDraw, members: list):
+    def draw_ayes(draw: ImageDraw.ImageDraw, members: dict):
         columns = math.ceil(len(members) / 10)
         draw.text((100, 420), "Ayes", font=title_font, fill=(0, 0, 0))
 
+        member_keys = list(members.keys())
         for column in range(columns + 1):
-            for j, member in enumerate(members[10 * (column - 1) : 10 * column]):
+            for j, key in enumerate(member_keys[10 * (column - 1) : 10 * column]):
+                colour = members[key]
                 draw.ellipse(
                     [
                         (
@@ -137,14 +140,16 @@ def division_image():
                             500 + (20 * j) + (2 * j) - 2,
                         ),
                     ],
-                    f"{member['colour']}",
+                    f"{colour}",
                 )
 
-    def draw_noes(draw: ImageDraw.ImageDraw, members: list):
+    def draw_noes(draw: ImageDraw.ImageDraw, members: dict):
         columns = math.ceil(len(members) / 10)
         draw.text((100, 120), "Noes", font=title_font, fill=(0, 0, 0))
+        member_keys = members.keys()
         for column in range(columns + 1):
-            for j, member in enumerate(members[10 * (column - 1) : 10 * column]):
+            for j, key in enumerate(member_keys[10 * (column - 1) : 10 * column]):
+                colour = members[key]
                 draw.ellipse(
                     [
                         (
@@ -156,7 +161,7 @@ def division_image():
                             200 + (20 * j) + ((2 * j) - 2),
                         ),
                     ],
-                    f"{member['colour']}",
+                    f"{colour}",
                 )
 
     def draw_keys(draw: ImageDraw.ImageDraw, parties: dict):
