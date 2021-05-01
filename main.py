@@ -185,6 +185,7 @@ def division_image():
     buffer = BytesIO()
     im.save(buffer, format="png")
     buffer.seek(0)
+    print("Sending image")
     return flask.send_file(buffer, attachment_filename="divisionimage.png")
 
 
