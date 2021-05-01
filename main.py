@@ -146,7 +146,7 @@ def division_image():
     def draw_noes(draw: ImageDraw.ImageDraw, members: dict):
         columns = math.ceil(len(members) / 10)
         draw.text((100, 120), "Noes", font=title_font, fill=(0, 0, 0))
-        member_keys = members.keys()
+        member_keys = list(members.keys())
         for column in range(columns + 1):
             for j, key in enumerate(member_keys[10 * (column - 1) : 10 * column]):
                 colour = members[key]
