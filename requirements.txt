@@ -1,4 +1,5 @@
 Flask
+matplotlib
 gunicorn
 Wand
 requests
