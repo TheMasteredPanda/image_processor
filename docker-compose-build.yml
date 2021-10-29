@@ -3,6 +3,8 @@ services:
   image_processor:
     image: hattyot/tldr-image-processor:latest
     container_name: tldr-image-processor
+    ports:
+      - "5000:5000"
     build:
       context: .
       dockerfile: Dockerfile
