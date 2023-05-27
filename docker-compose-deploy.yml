@@ -1,7 +1,7 @@
 version: '3.4'
 services:
   image_processor:
-    image: hattyot/tldr-image-processor:latest
+    image: themasteredpanda/tldr-image-processor:latest
     container_name: tldr-image-processor
     ports:
       - "5000:5000"
